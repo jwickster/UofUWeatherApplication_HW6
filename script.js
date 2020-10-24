@@ -34,10 +34,7 @@ function weatherApp(city) {
         console.log(response.weather[0].icon);
         
         var currentImg = $("<img>");
-        currentImg.attr(
-            "src",
-            "https://openweathermap.org/img/wn/" + response.weather[0].icon + ".png"
-        );
+        currentImg.attr("src", "https://openweathermap.org/img/wn/" + response.weather[0].icon + ".png");
         //convert Kelven to farenheit https://www.checkyourmath.com/convert/temperature/kelvin_fahrenheit.php
         var actualTemp = Math.floor((response.main.temp - 273.15) * 1.8 + 32);
         
@@ -49,37 +46,29 @@ function weatherApp(city) {
         cityLat = response.coord.lat;
         cityLon = response.coord.lon;
         
-        
-        var uvQueryUrl =
-            "https://api.openweathermap.org/data/2.5/uvi?appid=" +
-            apiKey +
-            "&lat=" +
-            cityLat +
-            "&lon=" +
-            cityLon;
+        //Get UV Index
+        var uvIndexurl = "https://api.openweathermap.org/data/2.5/uvi?appid=" + apiKey + "&lat=" + cityLat + "&lon=" + cityLon;
         $.ajax({
-            url: uvQueryUrl,
+            url: uvIndexurl,
             method: "GET",
             
-        }).then(function (uvRes) {
             
+        }).then(function (UVindex) {
             
-            cityUvIndex.html("UV Index : " + uvRes.value);
+            cityUvIndex.html("UV Index : " + UVindex.value);
             
-            var fiveDayQueryUrl =
-                "https://api.openweathermap.org/data/2.5/forecast?q=" +
-                city + "&appid=" + apiKey;
+            var fiveDayQueryUrl = "https://api.openweathermap.org/data/2.5/forecast?q=" + city + "&appid=" + apiKey;
             $.ajax({
                 url: fiveDayQueryUrl,
                 method: "GET",
-            }).then(function (fiveDayForecast) {
-                $(".fiveDayRow").empty();
+            }).then(function (fiveDayForecast) {$(".fiveDayRow").empty();
                 
                 // for the five day forcast
                 
                 for (var i = 0; i < fiveDayForecast.list.length; i++) {
                     //if five day forecast at index i search element 12:00:00 is not equal to -1
                     if (fiveDayForecast.list[i].dt_txt.indexOf("12:00:00") !== -1) {
+                        //
                         var date = fiveDayForecast.list[i].dt_txt;
                         date = moment.parseZone(date).format("MMM Do");
                         var tempF = Math.floor(
