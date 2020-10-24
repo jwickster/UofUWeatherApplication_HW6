@@ -1,48 +1,107 @@
-//Linking variables to jQuery
-//capturing Name, temp, humidity, wind speed, UV index, long/latitude
-var cityUVIndex = $(".uvIndex");
-var cityName = $(".temp");
+var cityName = $(".cityName");
+var cityTemp = $(".temp");
 var cityHumidity = $(".humidity");
 var cityWindSpeed = $(".windSpeed");
-var cityTemperature = $(".temp");
-var cityLongitude = "";
-var cityLatitude = "";
+var cityUvIndex = $(".uvIndex");
+var cityLat = "";
+var cityLon = "";
 
-//JSON parse
-var localStorageCity = JSON.parse(localStorage.getItem("cityName"));
+var cityFromLocalStorage = JSON.parse(localStorage.getItem("cityName"));
+weatherApp(cityFromLocalStorage);
 
-//Logic
-
-//Event handler to populate when searchButton is pressed
 $("#find-city").on("click", function (event) {
     event.preventDefault();
-    //create city and link to city-input id
-    var city = $("#city-input");
-    //create button tag and assign to searchButton
-    var searchButton = ("<button>");
-    //Search button text city
-    searchButton.text(city);
-    //Stringify the city input to parse by JSON
-    localStorage.setItem("cityName", JSON.stringify(city));
 
-    //TODO call function
-    weatherApplicationFinal();
+    var city = $("#city-input").val();
+    var searchedBtn = $("<button>");
+    searchedBtn.text(city);
+    $(".searched").append(searchedBtn);
+
+    localStorage.setItem("cityName", JSON.stringify(city));
+    weatherApp(city);
 });
 
-function weatherApplicationFinal() {
-    //API key 
+function weatherApp(city) {
     var apiKey = "e686e0dce848c687199057ba5b1706c5";
-    //Query API and concat with city input and api key 
-    var url = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid" + apiKey;
+    var queryurl =
+        "https://api.openweathermap.org/data/2.5/weather?q=" +
+        city + "&appid=" + apiKey;
 
     $.ajax({
-        //point url to the url above and use GET method to retrive the information from server
-        url: url,
-        method: "GET"
+        url: queryurl,
+        method: "GET",
     }).then(function (response) {
-            //console log printf statement for debugging
-            //console.log(response.weather[0].icon);
-        }
+        console.log(response.weather[0].icon);
+
+        var currentImg = $("<img>");
+        currentImg.attr(
+            "src",
+            `https://openweathermap.org/img/wn/${response.weather[0].icon}.png`
+        );
+
+        var actualTemp = Math.floor((response.main.temp - 273.15) * 1.8 + 32);
+
+        cityName.html(response.name);
+        cityName.append(currentImg);
+        cityTemp.html("Temp : " + actualTemp);
+        cityHumidity.html("humidity : " + response.main.humidity);
+        cityWindSpeed.html("Windspeed : " + response.wind.speed);
+        cityLat = response.coord.lat;
+        cityLon = response.coord.lon;
 
 
-    }
+        var uvQueryUrl =
+            "https://api.openweathermap.org/data/2.5/uvi?appid=" +
+            apiKey + "&lat=" + cityLat + "&lon=" + cityLon;
+        $.ajax({
+            url: uvQueryUrl,
+            method: "GET",
+
+        }).then(function (uvAmount) {
+
+
+            cityUvIndex.html("UV Index : " + uvAmount.value);
+
+            var fiveDayQueryUrl =
+                "https://api.openweathermap.org/data/2.5/forecast?q=" +
+                city + "&appid=" + apiKey;
+            $.ajax({
+                url: fiveDayQueryUrl,
+                method: "GET",
+            }).then(function (fiveDayForecase) {
+                $(".fiveDayRow").empty();
+
+                // for the five day forcast
+
+                for (var i = 0; i < fivedayRes.list.length; i++) {
+                    if (fivedayRes.list[i].dt_txt.indexOf("12:00:00") !== -1) {
+                        var date = fivedayRes.list[i].dt_txt;
+                        date = moment.parseZone(date).format("MMM Do");
+                        var tempF = Math.floor((fivedayRes.list[i].main.temp - 273.15) * 1.8 + 32);
+
+
+                        var humidityFive = fivedayRes.list[i].main.humidity;
+                        var wrapper = $("<div>");
+                        wrapper.attr("class", "col-md-2");
+                        var fiveDate = $("<p>");
+                        fiveDate.text(date);
+                        var fiveImage = $("<img>");
+                        fiveImage.attr(
+                            "src",
+                            "http://openweathermap.org/img/wn/" +
+                            fivedayRes.list[i].weather[0].icon +
+                            ".png"
+                        );
+
+                        var fiveTemp = $("<p>");
+                        fiveTemp.text("Temp: " + tempF);
+                        var fiveHumidity = $("<p>");
+                        fiveHumidity.text("Humidity: " + humidityFive);
+                        wrapper.append(fiveDate, fiveImage, fiveTemp, fiveHumidity);
+                        $(".fiveDayRow").append(wrapper);
+                    }
+                }
+            });
+        });
+    });
+}
