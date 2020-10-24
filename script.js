@@ -3,8 +3,8 @@ var cityTemp = $(".temp");
 var cityHumidity = $(".humidity");
 var cityWindSpeed = $(".windSpeed");
 var cityUvIndex = $(".uvIndex");
-var cityLat = "";
-var cityLon = "";
+var cityLatitude = "";
+var cityLongitude = "";
 
 var cityFromLocalStorage = JSON.parse(localStorage.getItem("cityName"));
 weatherApp(cityFromLocalStorage);
@@ -33,21 +33,21 @@ function weatherApp(city) {
     }).then(function (response) {
         console.log(response.weather[0].icon);
         
-        var currentImg = $("<img>");
-        currentImg.attr("src", "https://openweathermap.org/img/wn/" + response.weather[0].icon + ".png");
+        var currentImage = $("<img>");
+        currentImage.attr("src", "https://openweathermap.org/img/wn/" + response.weather[0].icon + ".png");
         //convert Kelven to farenheit https://www.checkyourmath.com/convert/temperature/kelvin_fahrenheit.php
         var actualTemp = Math.floor((response.main.temp - 273.15) * 1.8 + 32);
         
         cityName.html(response.name);
-        cityName.append(currentImg);
+        cityName.append(currentImage);
         cityTemp.html("Temp : " + actualTemp);
-        cityHumidity.html("humidity : " + response.main.humidity);
-        cityWindSpeed.html("Windspeed : " + response.wind.speed);
-        cityLat = response.coord.lat;
-        cityLon = response.coord.lon;
+        cityHumidity.html("Local Humidty : " + response.main.humidity);
+        cityWindSpeed.html("Windspeed speed : " + response.wind.speed);
+        cityLatitude = response.coord.lat;
+        cityLongitude = response.coord.lon;
         
         //Get UV Index
-        var uvIndexurl = "https://api.openweathermap.org/data/2.5/uvi?appid=" + apiKey + "&lat=" + cityLat + "&lon=" + cityLon;
+        var uvIndexurl = "https://api.openweathermap.org/data/2.5/uvi?appid=" + apiKey + "&lat=" + cityLatitude + "&lon=" + cityLongitude;
         $.ajax({
             url: uvIndexurl,
             method: "GET",
