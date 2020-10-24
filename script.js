@@ -26,6 +26,23 @@ $("#find-city").on("click", function (event) {
     localStorage.setItem("cityName", JSON.stringify(city));
 
     //TODO call function
+    weatherApplicationFinal();
 });
 
-function
+function weatherApplicationFinal() {
+    //API key 
+    var apiKey = "e686e0dce848c687199057ba5b1706c5";
+    //Query API and concat with city input and api key 
+    var url = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid" + apiKey;
+
+    $.ajax({
+        //point url to the url above and use GET method to retrive the information from server
+        url: url,
+        method: "GET"
+    }).then(function (response) {
+            //console log printf statement for debugging
+            //console.log(response.weather[0].icon);
+        }
+
+
+    }
